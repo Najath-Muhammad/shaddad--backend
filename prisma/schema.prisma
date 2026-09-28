@@ -14,10 +14,26 @@ enum UserRole {
 }
 
 enum DriverVerificationStatus {
-  PENDING
+  PENDING_VERIFICATION
   APPROVED
   REJECTED
   SUSPENDED
+}
+
+enum DriverAvailability {
+  OFFLINE
+  ONLINE
+  BUSY
+}
+
+enum VehicleType {
+  DYNA
+  PICKUP_SMALL
+  PICKUP_LARGE
+  TRAILER
+  FLATBED
+  REFRIGERATED
+  BOX_TRUCK
 }
 
 model User {
@@ -55,19 +71,72 @@ model CustomerProfile {
 }
 
 model DriverProfile {
-  id                 String                   @id @default(uuid())
-  userId             String                   @unique
-  user               User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  nationalIdNumber   String?                  @unique
-  licenseNumber      String?                  @unique
-  verificationStatus DriverVerificationStatus @default(PENDING)
-  isOnline           Boolean                  @default(false)
-  rating             Float                    @default(5.0)
-  walletBalance      Decimal                  @default(0.00) @db.Decimal(12, 2)
-  createdAt          DateTime                 @default(now())
-  updatedAt          DateTime                 @updatedAt
+  id                   String                   @id @default(uuid())
+  userId               String                   @unique
+  user                 User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nationalIdNumber     String?                  @unique
+  licenseNumber        String?                  @unique
+  verificationStatus   DriverVerificationStatus @default(PENDING_VERIFICATION)
+  availability         DriverAvailability       @default(OFFLINE)
+  currentLatitude      Float?
+  currentLongitude     Float?
+  lastLocationAt       DateTime?
+  rating               Float                    @default(5.0)
+  totalTripsCount      Int                      @default(0)
+  walletBalance        Decimal                  @default(0.00) @db.Decimal(12, 2)
 
+  // Documents
+  nationalIdFrontUrl   String?
+  nationalIdBackUrl    String?
+  licenseUrl           String?
+  profilePhotoUrl      String?
+  licenseExpiryDate    DateTime?
+  nationalIdExpiryDate DateTime?
+
+  // Verification tracking
+  verifiedAt           DateTime?
+  verifiedByAdminId    String?
+  rejectionReason      String?
+  suspensionReason     String?
+
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+
+  vehicle              Vehicle?
+
+  @@index([verificationStatus])
+  @@index([availability])
   @@map("driver_profiles")
+}
+
+model Vehicle {
+  id                  String      @id @default(uuid())
+  driverProfileId     String      @unique
+  driverProfile       DriverProfile @relation(fields: [driverProfileId], references: [id], onDelete: Cascade)
+  vehicleType         VehicleType
+  make                String
+  model               String
+  year                Int
+  plateNumber         String      @unique
+  color               String
+  maxWeightKg         Float
+  maxLengthCm         Float?
+  isRefrigerated      Boolean     @default(false)
+  isVerified          Boolean     @default(false)
+
+  // Vehicle Documents
+  registrationUrl     String?
+  registrationExpiry  DateTime?
+  insuranceUrl        String?
+  insuranceExpiry     DateTime?
+  vehiclePhotoUrl     String?
+
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  @@index([vehicleType])
+  @@index([plateNumber])
+  @@map("vehicles")
 }
 
 model RefreshToken {

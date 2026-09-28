@@ -34,10 +34,10 @@ export class UserResponseMapper {
         nationalIdNumber: user.driverProfile.nationalIdNumber,
         licenseNumber: user.driverProfile.licenseNumber,
         verificationStatus: user.driverProfile.verificationStatus as DriverVerificationStatusType,
-        isOnline: user.driverProfile.isOnline,
+        availability: (user.driverProfile as any).availability, // workaround since prisma client type might be out of sync if not fully generated
         rating: user.driverProfile.rating,
         walletBalance: user.driverProfile.walletBalance.toString(),
-      };
+      } as any;
     }
 
     return dto;

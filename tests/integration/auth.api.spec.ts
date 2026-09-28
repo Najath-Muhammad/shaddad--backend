@@ -128,13 +128,31 @@ describe('Auth API (Integration Tests)', () => {
     authService = new AuthService(inMemoryRepo, tokenService, hashService);
     authController = new AuthController(authService);
 
-    const testContainer: AppContainer = {
+    const testContainer = {
       authRepository: inMemoryRepo,
       hashService,
       tokenService,
       authService,
       authController,
-    };
+      driverController: {
+        getProfile: (req: any, res: any) => res.json({}),
+        getVehicle: (req: any, res: any) => res.json({}),
+        createVehicle: (req: any, res: any) => res.json({}),
+        updateVehicle: (req: any, res: any) => res.json({}),
+        uploadDocuments: (req: any, res: any) => res.json({}),
+        updateAvailability: (req: any, res: any) => res.json({}),
+        updateLocation: (req: any, res: any) => res.json({}),
+      } as any,
+      adminDriverController: {
+        getPendingDrivers: (req: any, res: any) => res.json({}),
+        getDriverDossier: (req: any, res: any) => res.json({}),
+        verifyDriver: (req: any, res: any) => res.json({}),
+      } as any,
+      customerDriverController: {
+        getNearbyDrivers: (req: any, res: any) => res.json({}),
+        getDriverDetails: (req: any, res: any) => res.json({}),
+      } as any,
+    } as AppContainer;
 
     app = createApp(testContainer);
   });

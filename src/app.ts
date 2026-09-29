@@ -38,6 +38,13 @@ export const createApp = (container: AppContainer = createContainer()): Express 
     })
   );
 
+  // Stripe Webhook needs RAW body BEFORE express.json() parses it
+  app.post(
+    '/api/v1/payments/webhooks/stripe', 
+    express.raw({ type: 'application/json' }), 
+    (req, res, next) => container.paymentController.stripeWebhook(req, res, next)
+  );
+
   // Body Parsing Middleware
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -111,6 +118,10 @@ export const createApp = (container: AppContainer = createContainer()): Express 
   );
 
   apiRouter.use('/roles', createRoleTestRouter(container.tokenService));
+
+  // Payment Routes
+  const { createPaymentRouter } = require('./modules/payment/payment.routes.js');
+  apiRouter.use('/payments', createPaymentRouter(container.paymentController, container.tokenService));
 
   app.use(ApiRoutes.BASE_V1, apiRouter);
 

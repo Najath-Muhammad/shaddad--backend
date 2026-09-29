@@ -24,7 +24,8 @@ export class TripService implements ITripService {
   constructor(
     private readonly _tripRepository: ITripRepository,
     private readonly _pricingService: IPricingService,
-    private readonly _driverRepository: IDriverRepository
+    private readonly _driverRepository: IDriverRepository,
+    private readonly _payoutService: any // Avoid circular type dependency for now by using any
   ) {}
 
   async calculatePrice(data: CalculatePriceDTO): Promise<{ distanceKm: number; pricing: PricingBreakdownDTO; }> {
@@ -149,28 +150,6 @@ export class TripService implements ITripService {
     return updatedTrip;
   }
 
-  async confirmTestPayment(customerProfileId: string, tripId: string): Promise<Trip> {
-    const trip = await this.getTripDetails(tripId);
-    
-    if (trip.customerId !== customerProfileId) {
-      throw new AppError('Unauthorized', HttpStatusCodes.FORBIDDEN);
-    }
-
-    if (trip.status !== 'ACCEPTED') {
-      throw new AppError('Trip must be ACCEPTED to process payment', HttpStatusCodes.BAD_REQUEST);
-    }
-
-    // Simulate PAYMENT_PENDING -> CONFIRMED
-    await this._tripRepository.updateTripStatus(tripId, 'PAYMENT_PENDING' as any, customerProfileId, 'Test Payment initiated');
-    
-    // Generate Delivery OTP
-    const deliveryOtp = Math.floor(1000 + Math.random() * 9000).toString();
-
-    // Update to confirmed
-    const updatedTrip = await this._tripRepository.updateTripStatusAndOtp(tripId, 'CONFIRMED' as any, deliveryOtp, customerProfileId, 'Test Payment successful');
-    return updatedTrip;
-  }
-
   async submitProofOfDelivery(driverProfileId: string, tripId: string, otp: string, _photoUrl?: string): Promise<Trip> {
     const trip = await this.getTripDetails(tripId);
     
@@ -192,6 +171,11 @@ export class TripService implements ITripService {
     // Auto-complete
     updatedTrip = await this._tripRepository.updateTripStatus(tripId, 'COMPLETED' as any, driverProfileId, 'Trip completed successfully');
     await this._driverRepository.updateAvailability(driverProfileId, 'ONLINE');
+
+    // Create Eligible Payout (Driver Earnings = 85% of subtotal/totalPrice)
+    if (this._payoutService && updatedTrip.driverEarnings) {
+      await this._payoutService.createEligiblePayout(driverProfileId, tripId, Number(updatedTrip.driverEarnings));
+    }
 
     return updatedTrip;
   }

@@ -6,6 +6,8 @@ import { ITokenService } from '../auth/interfaces/ITokenService.js';
 export class SocketServer {
   private _io: Server;
 
+  private static _instance: Server;
+
   constructor(
     private readonly _httpServer: HttpServer,
     private readonly _prisma: PrismaClient,
@@ -18,7 +20,20 @@ export class SocketServer {
       }
     });
 
+    SocketServer._instance = this._io;
     this.initialize();
+  }
+
+  public static emitToUser(userId: string, event: string, data: any) {
+    if (this._instance) {
+      this._instance.to(`user__${userId}`).emit(event, data);
+    }
+  }
+
+  public static emitToTrip(tripId: string, event: string, data: any) {
+    if (this._instance) {
+      this._instance.to(`trip__${tripId}`).emit(event, data);
+    }
   }
 
   private initialize() {
@@ -42,6 +57,7 @@ export class SocketServer {
       console.log(`Socket connected: ${socket.id}, User: ${(socket as any).user.userId}`);
       
       const user = (socket as any).user;
+      socket.join(`user__${user.userId}`);
 
       socket.on('join_trip', async (data: { tripId: string }) => {
         const { tripId } = data;

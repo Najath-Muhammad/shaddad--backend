@@ -62,6 +62,12 @@ export interface AppContainer {
   tripExpirationService: TripExpirationService;
   customerTripController: CustomerTripController;
   driverTripController: DriverTripController;
+
+  // Phase 5
+  paymentRepository: any;
+  paymentProvider: any;
+  paymentService: any;
+  paymentController: any;
 }
 
 export const createContainer = (): AppContainer => {
@@ -88,8 +94,19 @@ export const createContainer = (): AppContainer => {
     driverLocationRepository
   );
 
+  const { NotificationService } = require('./modules/notification/NotificationService.js');
+  const notificationService = new NotificationService(prisma);
+
+  const { PayoutRepository } = require('./modules/payout/repositories/PayoutRepository.js');
+  const { MockPayoutProvider } = require('./modules/payout/providers/MockPayoutProvider.js');
+  const { PayoutService } = require('./modules/payout/services/PayoutService.js');
+
+  const payoutRepository = new PayoutRepository(prisma);
+  const payoutProvider = new MockPayoutProvider();
+  const payoutService = new PayoutService(payoutProvider, payoutRepository, driverRepository);
+
   const pricingService: IPricingService = new PricingService(pricingRepository);
-  const tripService: ITripService = new TripService(tripRepository, pricingService, driverRepository);
+  const tripService: ITripService = new TripService(tripRepository, pricingService, driverRepository, payoutService);
   const tripExpirationService = new TripExpirationService(tripRepository);
 
   // Controllers
@@ -99,6 +116,16 @@ export const createContainer = (): AppContainer => {
   const customerDriverController = new CustomerDriverController(driverService);
   const customerTripController = new CustomerTripController(tripService, prisma);
   const driverTripController = new DriverTripController(tripService, prisma);
+
+  const { PaymentRepository } = require('./modules/payment/repositories/PaymentRepository.js');
+  const { StripePaymentProvider } = require('./modules/payment/providers/StripePaymentProvider.js');
+  const { PaymentService } = require('./modules/payment/services/PaymentService.js');
+  const { PaymentController } = require('./modules/payment/controllers/PaymentController.js');
+
+  const paymentRepository = new PaymentRepository(prisma);
+  const paymentProvider = new StripePaymentProvider();
+  const paymentService = new PaymentService(paymentProvider, paymentRepository, tripRepository, notificationService);
+  const paymentController = new PaymentController(paymentService, prisma);
 
   return {
     authRepository,
@@ -121,5 +148,10 @@ export const createContainer = (): AppContainer => {
     tripExpirationService,
     customerTripController,
     driverTripController,
+
+    paymentRepository,
+    paymentProvider,
+    paymentService,
+    paymentController
   };
 };

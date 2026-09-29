@@ -20,7 +20,10 @@ export const createCustomerTripRouter = (
   router.post('/', validateRequest(CreateTripSchema), controller.createTrip);
   router.get('/', controller.getTrips);
   router.get('/:tripId', controller.getTrip);
-  router.post('/:tripId/test-payment', controller.confirmTestPayment);
+  
+  const { ReviewController } = require('../review/controllers/ReviewController.js');
+  const reviewController = new ReviewController((controller as any)._prisma);
+  router.post('/:tripId/review', reviewController.submitReview);
 
   return router;
 };

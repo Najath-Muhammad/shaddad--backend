@@ -20,6 +20,14 @@ export class StripePaymentProvider implements IPaymentProvider {
       // Stripe amounts are in cents/halalas
       const amountInCents = Math.round(amount * 100);
 
+      // Mock behavior for missing Stripe Keys
+      if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === 'sk_test_dummy') {
+        return {
+          clientSecret: 'pi_dummy_secret_test_123',
+          paymentId: 'pi_dummy_123'
+        };
+      }
+
       const paymentIntent = await this._stripe.paymentIntents.create({
         amount: amountInCents,
         currency: currency.toLowerCase(),
@@ -41,6 +49,9 @@ export class StripePaymentProvider implements IPaymentProvider {
 
   verifyWebhook(rawBody: string | Buffer, signature: string): WebhookVerificationResult {
     try {
+      if (signature === 'mock_signature' && this._webhookSecret === 'whsec_dummy') {
+        return { isValid: true, event: JSON.parse(rawBody.toString()) };
+      }
       const event = this._stripe.webhooks.constructEvent(
         rawBody,
         signature,

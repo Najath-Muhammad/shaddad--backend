@@ -16,6 +16,7 @@ export const createPaymentRouter = (
 
   // Protected routes
   router.post('/trips/:tripId/initiate', authMiddleware, requireRole('CUSTOMER'), controller.initiatePayment);
+  router.post('/trips/:tripId/simulate-success', authMiddleware, requireRole('CUSTOMER'), controller.simulateSuccess);
 
   return router;
 };

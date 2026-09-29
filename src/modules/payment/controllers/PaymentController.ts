@@ -26,6 +26,30 @@ export class PaymentController {
     }
   };
 
+  simulateSuccess = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const tripId = req.params.tripId;
+      // In a real app we'd trigger webhook. Here we'll just mock the event.
+      const event = {
+        type: 'payment_intent.succeeded',
+        data: {
+          object: {
+            id: 'pi_dummy_123',
+            amount: 1000,
+            currency: 'sar',
+            status: 'succeeded',
+            metadata: { tripId }
+          }
+        }
+      };
+      
+      await this._paymentService.handleWebhook(JSON.stringify(event), 'mock_signature');
+      res.status(HttpStatusCodes.OK).json(ApiResponseBuilder.success(null, 'Payment simulated'));
+    } catch (error) {
+      next(error);
+    }
+  };
+
   stripeWebhook = async (req: Request, res: Response): Promise<void> => {
     try {
       const signature = req.headers['stripe-signature'] as string;

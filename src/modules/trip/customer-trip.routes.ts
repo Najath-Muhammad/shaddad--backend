@@ -20,6 +20,7 @@ export const createCustomerTripRouter = (
   router.post('/', validateRequest(CreateTripSchema), controller.createTrip);
   router.get('/', controller.getTrips);
   router.get('/:tripId', controller.getTrip);
+  router.post('/:tripId/test-payment', controller.confirmTestPayment);
 
   return router;
 };

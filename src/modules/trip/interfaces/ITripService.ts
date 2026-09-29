@@ -9,8 +9,12 @@ export interface ITripService {
   
   // Driver Actions
   getIncomingRequests(driverUserId: string): Promise<Trip[]>;
+  getDriverTrips(driverUserId: string): Promise<Trip[]>;
   respondToTrip(driverUserId: string, tripId: string, accept: boolean, reason?: string): Promise<Trip>;
   
   // Customer Actions
   getCustomerTrips(customerId: string): Promise<Trip[]>;
+  updateTripState(profileId: string, userRole: string, tripId: string, newState: string): Promise<Trip>;
+  confirmTestPayment(customerProfileId: string, tripId: string): Promise<Trip>;
+  submitProofOfDelivery(driverProfileId: string, tripId: string, otp: string, photoUrl?: string): Promise<Trip>;
 }

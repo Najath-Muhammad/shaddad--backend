@@ -19,6 +19,12 @@ const startServer = async (): Promise<http.Server> => {
     // 4. Start HTTP Server
     const server = http.createServer(app);
 
+    // 5. Initialize Socket.IO Server
+    const { tokenService } = app.locals.container;
+    const { prisma } = await import('./config/database.js');
+    const { SocketServer } = await import('./modules/realtime/SocketServer.js');
+    new SocketServer(server, prisma, tokenService);
+
     server.listen(env.PORT, () => {
       logger.info(`🚀 SHADDAD Backend Server running on port ${env.PORT} in ${env.NODE_ENV} mode`);
     });

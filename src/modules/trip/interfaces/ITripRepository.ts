@@ -20,7 +20,16 @@ export interface ITripRepository {
     reason?: string
   ): Promise<Trip>;
 
+  updateTripStatusAndOtp(
+    tripId: string, 
+    status: TripStatus, 
+    otp: string, 
+    changedById: string | null, 
+    reason?: string
+  ): Promise<Trip>;
+
   getPendingTripsForDriver(driverProfileId: string): Promise<Trip[]>;
+  getDriverTrips(driverProfileId: string): Promise<Trip[]>;
   getCustomerTrips(customerId: string): Promise<Trip[]>;
 
   expirePendingTrips(currentTime: Date): Promise<number>;

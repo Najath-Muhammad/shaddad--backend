@@ -161,6 +161,15 @@ enum TripStatus {
   ACCEPTED
   REJECTED
   EXPIRED
+  PAYMENT_PENDING
+  CONFIRMED
+  GOING_TO_PICKUP
+  DRIVER_ARRIVED
+  CARGO_PICKED_UP
+  IN_TRANSIT
+  ARRIVED_AT_DESTINATION
+  DELIVERED
+  COMPLETED
 }
 
 model Trip {
@@ -187,6 +196,10 @@ model Trip {
   weightKg               Float
   quantity               Int
   additionalRequirements String?
+
+  // Proof of Delivery
+  deliveryOtp            String?
+  deliveryPhotoUrl       String?
 
   // Financials
   baseFare               Decimal          @db.Decimal(10, 2)

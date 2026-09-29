@@ -129,5 +129,6 @@ export const createApp = (container: AppContainer = createContainer()): Express 
   // Global Error Handler Middleware
   app.use(errorHandler);
 
+  app.locals.container = container;
   return app;
 };

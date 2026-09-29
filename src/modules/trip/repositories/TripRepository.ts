@@ -83,6 +83,27 @@ export class TripRepository implements ITripRepository {
     });
   }
 
+  async updateTripStatusAndOtp(tripId: string, status: TripStatus, otp: string, changedById: string | null, reason?: string): Promise<Trip> {
+    return this._prisma.trip.update({
+      where: { id: tripId },
+      data: {
+        status,
+        deliveryOtp: otp,
+        statusHistory: {
+          create: {
+            status,
+            changedById,
+            reason
+          }
+        }
+      },
+      include: {
+        customer: { include: { user: true } },
+        driver: { include: { user: true, vehicle: true } }
+      }
+    });
+  }
+
   async getPendingTripsForDriver(driverProfileId: string): Promise<Trip[]> {
     return this._prisma.trip.findMany({
       where: {
@@ -101,6 +122,16 @@ export class TripRepository implements ITripRepository {
       where: { customerId },
       include: {
         driver: { include: { user: true, vehicle: true } }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+  }
+
+  async getDriverTrips(driverProfileId: string): Promise<Trip[]> {
+    return this._prisma.trip.findMany({
+      where: { driverId: driverProfileId },
+      include: {
+        customer: { include: { user: true } }
       },
       orderBy: { createdAt: 'desc' }
     });

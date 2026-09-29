@@ -111,4 +111,83 @@ export class TripService implements ITripService {
   async getCustomerTrips(customerProfileId: string): Promise<Trip[]> {
     return this._tripRepository.getCustomerTrips(customerProfileId);
   }
+
+  async getDriverTrips(driverProfileId: string): Promise<Trip[]> {
+    return this._tripRepository.getDriverTrips(driverProfileId);
+  }
+
+  // --- PHASE 4 STATE MACHINE ---
+  async updateTripState(profileId: string, userRole: string, tripId: string, newState: string): Promise<Trip> {
+    const trip = await this.getTripDetails(tripId);
+
+    if (userRole === 'DRIVER' && trip.driverId !== profileId) {
+      throw new AppError('Unauthorized', HttpStatusCodes.FORBIDDEN);
+    }
+    if (userRole === 'CUSTOMER' && trip.customerId !== profileId) {
+      throw new AppError('Unauthorized', HttpStatusCodes.FORBIDDEN);
+    }
+
+    const currentState = trip.status;
+    const validTransitions: Record<string, string[]> = {
+      CONFIRMED: ['GOING_TO_PICKUP'],
+      GOING_TO_PICKUP: ['DRIVER_ARRIVED'],
+      DRIVER_ARRIVED: ['CARGO_PICKED_UP'],
+      CARGO_PICKED_UP: ['IN_TRANSIT'],
+      IN_TRANSIT: ['ARRIVED_AT_DESTINATION'],
+      ARRIVED_AT_DESTINATION: ['DELIVERED'] // DELIVERED requires OTP which has its own method
+    };
+
+    if (!validTransitions[currentState] || !validTransitions[currentState].includes(newState)) {
+      throw new AppError(`Invalid state transition from ${currentState} to ${newState}`, HttpStatusCodes.BAD_REQUEST);
+    }
+
+    const updatedTrip = await this._tripRepository.updateTripStatus(tripId, newState as any, profileId, 'User triggered transition');
+    return updatedTrip;
+  }
+
+  async confirmTestPayment(customerProfileId: string, tripId: string): Promise<Trip> {
+    const trip = await this.getTripDetails(tripId);
+    
+    if (trip.customerId !== customerProfileId) {
+      throw new AppError('Unauthorized', HttpStatusCodes.FORBIDDEN);
+    }
+
+    if (trip.status !== 'ACCEPTED') {
+      throw new AppError('Trip must be ACCEPTED to process payment', HttpStatusCodes.BAD_REQUEST);
+    }
+
+    // Simulate PAYMENT_PENDING -> CONFIRMED
+    await this._tripRepository.updateTripStatus(tripId, 'PAYMENT_PENDING' as any, customerProfileId, 'Test Payment initiated');
+    
+    // Generate Delivery OTP
+    const deliveryOtp = Math.floor(1000 + Math.random() * 9000).toString();
+
+    // Update to confirmed
+    const updatedTrip = await this._tripRepository.updateTripStatusAndOtp(tripId, 'CONFIRMED' as any, deliveryOtp, customerProfileId, 'Test Payment successful');
+    return updatedTrip;
+  }
+
+  async submitProofOfDelivery(driverProfileId: string, tripId: string, otp: string, _photoUrl?: string): Promise<Trip> {
+    const trip = await this.getTripDetails(tripId);
+    
+    if (trip.driverId !== driverProfileId) {
+      throw new AppError('Unauthorized', HttpStatusCodes.FORBIDDEN);
+    }
+
+    if (trip.status !== 'ARRIVED_AT_DESTINATION') {
+      throw new AppError('Trip must be ARRIVED_AT_DESTINATION to submit proof', HttpStatusCodes.BAD_REQUEST);
+    }
+
+    if (trip.deliveryOtp !== otp) {
+      throw new AppError('Invalid Delivery OTP', HttpStatusCodes.BAD_REQUEST);
+    }
+
+    // Update to DELIVERED
+    let updatedTrip = await this._tripRepository.updateTripStatus(tripId, 'DELIVERED' as any, driverProfileId, 'Valid OTP provided');
+
+    // Auto-complete
+    updatedTrip = await this._tripRepository.updateTripStatus(tripId, 'COMPLETED' as any, driverProfileId, 'Trip completed successfully');
+
+    return updatedTrip;
+  }
 }

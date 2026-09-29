@@ -27,6 +27,16 @@ export class DriverTripController {
     }
   };
 
+  getTrips = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const driverProfileId = await this._getDriverProfileId(req.user!.userId);
+      const trips = await this._tripService.getDriverTrips(driverProfileId);
+      res.status(HttpStatusCodes.OK).json(ApiResponseBuilder.success(trips, 'Trips retrieved'));
+    } catch (error) {
+      next(error);
+    }
+  };
+
   respondToTrip = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const driverProfileId = await this._getDriverProfileId(req.user!.userId);
@@ -34,6 +44,30 @@ export class DriverTripController {
       const { accept, reason } = req.body;
       const trip = await this._tripService.respondToTrip(driverProfileId, tripId, accept, reason);
       res.status(HttpStatusCodes.OK).json(ApiResponseBuilder.success(trip, 'Trip response recorded'));
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  updateStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const driverProfileId = await this._getDriverProfileId(req.user!.userId);
+      const tripId = req.params.tripId as string;
+      const { status } = req.body;
+      const trip = await this._tripService.updateTripState(driverProfileId, 'DRIVER', tripId, status);
+      res.status(HttpStatusCodes.OK).json(ApiResponseBuilder.success(trip, 'Trip status updated'));
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  submitDeliveryProof = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const driverProfileId = await this._getDriverProfileId(req.user!.userId);
+      const tripId = req.params.tripId as string;
+      const { otp, photoUrl } = req.body;
+      const trip = await this._tripService.submitProofOfDelivery(driverProfileId, tripId, otp, photoUrl);
+      res.status(HttpStatusCodes.OK).json(ApiResponseBuilder.success(trip, 'Proof of delivery submitted successfully'));
     } catch (error) {
       next(error);
     }

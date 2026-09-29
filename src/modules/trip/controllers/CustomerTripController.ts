@@ -54,4 +54,14 @@ export class CustomerTripController {
       next(error);
     }
   };
+
+  confirmTestPayment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const customerProfileId = await this._getCustomerProfileId(req.user!.userId);
+      const trip = await this._tripService.confirmTestPayment(customerProfileId, req.params.tripId as string);
+      res.status(HttpStatusCodes.OK).json(ApiResponseBuilder.success(trip, 'Payment confirmed successfully'));
+    } catch (error) {
+      next(error);
+    }
+  };
 }

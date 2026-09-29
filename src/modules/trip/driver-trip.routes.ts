@@ -19,6 +19,7 @@ export const createDriverTripRouter = (
 
   router.get('/', controller.getTrips);
   router.get('/incoming', controller.getIncomingRequests);
+  router.get('/:tripId', controller.getTrip);
   router.post('/:tripId/respond', validateRequest(RespondToTripSchema), controller.respondToTrip);
   router.patch('/:tripId/status', validateRequest(UpdateTripStatusSchema), controller.updateStatus);
   router.post('/:tripId/deliver', validateRequest(SubmitDeliveryProofSchema), controller.submitDeliveryProof);

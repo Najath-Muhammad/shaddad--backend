@@ -37,6 +37,23 @@ export class DriverTripController {
     }
   };
 
+  getTrip = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const driverProfileId = await this._getDriverProfileId(req.user!.userId);
+      const tripId = req.params.tripId as string;
+      const trip = await this._tripService.getTripDetails(tripId);
+      
+      // Ensure the driver is authorized to view this trip
+      if (trip.driverId !== driverProfileId) {
+        throw new AppError('Unauthorized', HttpStatusCodes.FORBIDDEN, 'FORBIDDEN');
+      }
+
+      res.status(HttpStatusCodes.OK).json(ApiResponseBuilder.success(trip, 'Trip retrieved'));
+    } catch (error) {
+      next(error);
+    }
+  };
+
   respondToTrip = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const driverProfileId = await this._getDriverProfileId(req.user!.userId);

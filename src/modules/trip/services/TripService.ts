@@ -105,6 +105,10 @@ export class TripService implements ITripService {
 
     const newStatus = accept ? TripStatus.ACCEPTED : TripStatus.REJECTED;
     
+    if (accept) {
+      await this._driverRepository.updateAvailability(driverProfileId, 'BUSY');
+    }
+
     return this._tripRepository.updateTripStatus(tripId, newStatus, driverProfileId, reason || (accept ? 'Driver accepted' : 'Driver rejected'));
   }
 
@@ -187,6 +191,7 @@ export class TripService implements ITripService {
 
     // Auto-complete
     updatedTrip = await this._tripRepository.updateTripStatus(tripId, 'COMPLETED' as any, driverProfileId, 'Trip completed successfully');
+    await this._driverRepository.updateAvailability(driverProfileId, 'ONLINE');
 
     return updatedTrip;
   }

@@ -53,7 +53,12 @@ export class DriverService implements IDriverService {
       throw new AppError(ResponseMessages.PLATE_NUMBER_TAKEN, HttpStatusCodes.CONFLICT, 'CONFLICT');
     }
 
-    const vehicle = await this._driverRepository.createVehicle(profile.id, data);
+    let vehicle = await this._driverRepository.createVehicle(profile.id, data);
+    
+    if (profile.verificationStatus === DriverVerificationStatus.REJECTED || profile.verificationStatus === DriverVerificationStatus.SUSPENDED) {
+      await this._driverRepository.updateVerificationStatus(profile.id, DriverVerificationStatus.PENDING_VERIFICATION, 'SYSTEM');
+    }
+
     return DriverMapper.toVehicleResponse(vehicle);
   }
 
@@ -70,7 +75,12 @@ export class DriverService implements IDriverService {
       }
     }
 
-    const vehicle = await this._driverRepository.updateVehicle(profile.id, data);
+    let vehicle = await this._driverRepository.updateVehicle(profile.id, data);
+
+    if (profile.verificationStatus === DriverVerificationStatus.REJECTED || profile.verificationStatus === DriverVerificationStatus.SUSPENDED) {
+      await this._driverRepository.updateVerificationStatus(profile.id, DriverVerificationStatus.PENDING_VERIFICATION, 'SYSTEM');
+    }
+
     return DriverMapper.toVehicleResponse(vehicle);
   }
 
@@ -105,6 +115,11 @@ export class DriverService implements IDriverService {
     if (Object.keys(vehicleDocs).length > 0 && profile.vehicle) {
       await this._driverRepository.updateVehicleDocuments(profile.vehicle.id, vehicleDocs);
       updatedProfile = await this._driverRepository.findProfileById(profile.id); // reload to get new vehicle data
+    }
+
+    if (profile.verificationStatus === DriverVerificationStatus.REJECTED || profile.verificationStatus === DriverVerificationStatus.SUSPENDED) {
+      // Re-trigger verification process
+      updatedProfile = await this._driverRepository.updateVerificationStatus(profile.id, DriverVerificationStatus.PENDING_VERIFICATION, 'SYSTEM');
     }
 
     return DriverMapper.toDriverProfileResponse(updatedProfile);

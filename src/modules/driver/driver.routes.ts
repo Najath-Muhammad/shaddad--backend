@@ -5,7 +5,7 @@ import { createAuthenticateJwtMiddleware } from '../../common/middleware/authent
 import { validateRequest } from '../../common/middleware/validateRequest.js';
 import { ITokenService } from '../auth/interfaces/ITokenService.js';
 import { ApiRoutes } from '../../common/constants/ApiRoutes.js';
-import { uploadMiddleware } from '../../common/middleware/uploadMiddleware.js';
+import { uploadMiddleware, handleUploadError } from '../../common/middleware/uploadMiddleware.js';
 import { CreateVehicleSchema } from './dtos/CreateVehicleDTO.js';
 import { UpdateVehicleSchema } from './dtos/UpdateVehicleDTO.js';
 import { UpdateAvailabilitySchema } from './dtos/UpdateAvailabilityDTO.js';
@@ -26,6 +26,7 @@ export const createDriverRouter = (
   router.post(
     ApiRoutes.DRIVER.DOCUMENTS,
     uploadMiddleware.any(),
+    handleUploadError,
     controller.uploadDocuments
   );
 

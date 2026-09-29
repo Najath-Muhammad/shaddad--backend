@@ -5,6 +5,7 @@ import fs from 'fs';
 import { AppConstants } from '../constants/AppConstants.js';
 import { AppError } from '../errors/AppError.js';
 import { HttpStatusCodes } from '../constants/HttpStatusCodes.js';
+import { Request, Response, NextFunction } from 'express';
 
 // Ensure uploads directory exists
 const uploadsDir = path.resolve(process.cwd(), AppConstants.UPLOADS_DIR);
@@ -36,6 +37,31 @@ export const uploadMiddleware = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 10 * 1024 * 1024, // 10MB limit
   },
 });
+
+/**
+ * Express error-handling middleware that converts Multer errors
+ * into clean 400 responses instead of falling through as 500s.
+ */
+export const handleUploadError = (
+  err: unknown,
+  _req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  if (err instanceof multer.MulterError) {
+    const message =
+      err.code === 'LIMIT_FILE_SIZE'
+        ? 'File is too large. Maximum allowed size is 10MB.'
+        : `Upload error: ${err.message}`;
+    res.status(HttpStatusCodes.BAD_REQUEST).json({
+      success: false,
+      message,
+      errorCode: 'UPLOAD_ERROR',
+    });
+    return;
+  }
+  next(err);
+};

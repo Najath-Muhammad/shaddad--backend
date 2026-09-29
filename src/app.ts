@@ -19,6 +19,9 @@ import { createAdminDriverRouter } from './modules/driver/admin-driver.routes.js
 import { createCustomerDriverRouter } from './modules/driver/customer-driver.routes.js';
 import { isRedisReady } from './config/redis.js';
 
+import { createCustomerTripRouter } from './modules/trip/customer-trip.routes.js';
+import { createDriverTripRouter } from './modules/trip/driver-trip.routes.js';
+
 export const createApp = (container: AppContainer = createContainer()): Express => {
   const app: Express = express();
 
@@ -67,6 +70,11 @@ export const createApp = (container: AppContainer = createContainer()): Express 
     );
   });
 
+  // Start background services (e.g. Trip Expiration)
+  if (env.NODE_ENV !== 'test') {
+    container.tripExpirationService.start();
+  }
+
   // Mount API Routers under /api/v1
   const apiRouter = express.Router();
   apiRouter.use(
@@ -90,6 +98,16 @@ export const createApp = (container: AppContainer = createContainer()): Express 
   apiRouter.use(
     ApiRoutes.CUSTOMER.ROOT,
     createCustomerDriverRouter(container.customerDriverController, container.tokenService)
+  );
+
+  // Phase 3 Trips
+  apiRouter.use(
+    '/customers/trips',
+    createCustomerTripRouter(container.customerTripController, container.tokenService)
+  );
+  apiRouter.use(
+    '/drivers/trips',
+    createDriverTripRouter(container.driverTripController, container.tokenService)
   );
 
   apiRouter.use('/roles', createRoleTestRouter(container.tokenService));

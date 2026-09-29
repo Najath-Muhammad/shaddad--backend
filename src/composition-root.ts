@@ -23,6 +23,21 @@ import { IDriverRepository } from './modules/driver/interfaces/IDriverRepository
 import { IDriverLocationRepository } from './modules/driver/interfaces/IDriverLocationRepository.js';
 import { IDriverService } from './modules/driver/interfaces/IDriverService.js';
 
+// Pricing Module
+import { PricingRepository } from './modules/pricing/repositories/PricingRepository.js';
+import { PricingService } from './modules/pricing/services/PricingService.js';
+import { IPricingRepository } from './modules/pricing/interfaces/IPricingRepository.js';
+import { IPricingService } from './modules/pricing/interfaces/IPricingService.js';
+
+// Trip Module
+import { TripRepository } from './modules/trip/repositories/TripRepository.js';
+import { TripService } from './modules/trip/services/TripService.js';
+import { TripExpirationService } from './modules/trip/services/TripExpirationService.js';
+import { CustomerTripController } from './modules/trip/controllers/CustomerTripController.js';
+import { DriverTripController } from './modules/trip/controllers/DriverTripController.js';
+import { ITripRepository } from './modules/trip/interfaces/ITripRepository.js';
+import { ITripService } from './modules/trip/interfaces/ITripService.js';
+
 export interface AppContainer {
   // Auth
   authRepository: IAuthRepository;
@@ -38,6 +53,15 @@ export interface AppContainer {
   driverController: DriverController;
   adminDriverController: AdminDriverController;
   customerDriverController: CustomerDriverController;
+
+  // Phase 3
+  pricingRepository: IPricingRepository;
+  pricingService: IPricingService;
+  tripRepository: ITripRepository;
+  tripService: ITripService;
+  tripExpirationService: TripExpirationService;
+  customerTripController: CustomerTripController;
+  driverTripController: DriverTripController;
 }
 
 export const createContainer = (): AppContainer => {
@@ -45,6 +69,8 @@ export const createContainer = (): AppContainer => {
   const authRepository: IAuthRepository = new AuthRepository(prisma);
   const driverRepository: IDriverRepository = new DriverRepository(prisma);
   const driverLocationRepository: IDriverLocationRepository = new DriverLocationRepository(getRedisClient());
+  const pricingRepository: IPricingRepository = new PricingRepository(prisma);
+  const tripRepository: ITripRepository = new TripRepository(prisma);
 
   // Core Services
   const hashService: IHashService = new HashService();
@@ -62,11 +88,17 @@ export const createContainer = (): AppContainer => {
     driverLocationRepository
   );
 
+  const pricingService: IPricingService = new PricingService(pricingRepository);
+  const tripService: ITripService = new TripService(tripRepository, pricingService, driverRepository);
+  const tripExpirationService = new TripExpirationService(tripRepository);
+
   // Controllers
   const authController = new AuthController(authService);
   const driverController = new DriverController(driverService);
   const adminDriverController = new AdminDriverController(driverService);
   const customerDriverController = new CustomerDriverController(driverService);
+  const customerTripController = new CustomerTripController(tripService, prisma);
+  const driverTripController = new DriverTripController(tripService, prisma);
 
   return {
     authRepository,
@@ -81,5 +113,13 @@ export const createContainer = (): AppContainer => {
     driverController,
     adminDriverController,
     customerDriverController,
+
+    pricingRepository,
+    pricingService,
+    tripRepository,
+    tripService,
+    tripExpirationService,
+    customerTripController,
+    driverTripController,
   };
 };

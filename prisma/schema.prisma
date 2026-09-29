@@ -67,6 +67,8 @@ model CustomerProfile {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
+  trips           Trip[]
+
   @@map("customer_profiles")
 }
 
@@ -103,6 +105,7 @@ model DriverProfile {
   updatedAt            DateTime                 @updatedAt
 
   vehicle              Vehicle?
+  trips                Trip[]
 
   @@index([verificationStatus])
   @@index([availability])
@@ -151,4 +154,87 @@ model RefreshToken {
   @@index([tokenHash])
   @@index([userId])
   @@map("refresh_tokens")
+}
+
+enum TripStatus {
+  PENDING_DRIVER_RESPONSE
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+model Trip {
+  id                     String           @id @default(uuid())
+  customerId             String
+  customer               CustomerProfile  @relation(fields: [customerId], references: [id])
+  driverId               String
+  driver                 DriverProfile    @relation(fields: [driverId], references: [id])
+
+  // Location Details
+  pickupLatitude         Float
+  pickupLongitude        Float
+  pickupAddress          String
+  destinationLatitude    Float
+  destinationLongitude   Float
+  destinationAddress     String
+  distanceKm             Float
+
+  // Schedule
+  pickupDateTime         DateTime
+
+  // Cargo Details
+  cargoType              String
+  weightKg               Float
+  quantity               Int
+  additionalRequirements String?
+
+  // Financials
+  baseFare               Decimal          @db.Decimal(10, 2)
+  distanceCharge         Decimal          @db.Decimal(10, 2)
+  vehicleCharge          Decimal          @db.Decimal(10, 2)
+  weightCharge           Decimal          @db.Decimal(10, 2)
+  subtotal               Decimal          @db.Decimal(10, 2)
+  commission             Decimal          @db.Decimal(10, 2)
+  driverEarnings         Decimal          @db.Decimal(10, 2)
+  totalPrice             Decimal          @db.Decimal(10, 2)
+
+  status                 TripStatus       @default(PENDING_DRIVER_RESPONSE)
+  expiresAt              DateTime
+
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+
+  statusHistory          TripStatusHistory[]
+
+  @@index([customerId])
+  @@index([driverId])
+  @@index([status])
+  @@map("trips")
+}
+
+model TripStatusHistory {
+  id          String     @id @default(uuid())
+  tripId      String
+  trip        Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  status      TripStatus
+  reason      String?
+  changedById String?
+  createdAt   DateTime   @default(now())
+
+  @@index([tripId])
+  @@map("trip_status_history")
+}
+
+model PricingConfig {
+  id                   String      @id @default(uuid())
+  vehicleType          VehicleType @unique
+  baseFare             Decimal     @db.Decimal(10, 2)
+  perKmRate            Decimal     @db.Decimal(10, 2)
+  perKgRate            Decimal     @db.Decimal(10, 2)
+  commissionPercentage Decimal     @db.Decimal(5, 2)
+  isActive             Boolean     @default(true)
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+  
+  @@map("pricing_configs")
 }

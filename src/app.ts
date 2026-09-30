@@ -134,7 +134,11 @@ export const createApp = (container: AppContainer = createContainer()): Express 
 
   // Admin Dashboard Routes
   const { createAdminDashboardRouter } = require('./modules/admin/admin.routes.js');
-  apiRouter.use('/admin/dashboard', createAdminDashboardRouter(container.adminDashboardController, container.tokenService));
+  apiRouter.use('/admin', createAdminDashboardRouter(
+    container.adminDashboardController, 
+    container.adminEntityController,
+    container.tokenService
+  ));
 
   app.use(ApiRoutes.BASE_V1, apiRouter);
 

@@ -69,6 +69,7 @@ export interface AppContainer {
   paymentService: any;
   paymentController: any;
   adminDashboardController: any;
+  adminEntityController: any;
 }
 
 export const createContainer = (): AppContainer => {
@@ -129,7 +130,9 @@ export const createContainer = (): AppContainer => {
   const paymentController = new PaymentController(paymentService, prisma);
 
   const { AdminDashboardController } = require('./modules/admin/controllers/AdminDashboardController.js');
+  const { AdminEntityController } = require('./modules/admin/controllers/AdminEntityController.js');
   const adminDashboardController = new AdminDashboardController(prisma);
+  const adminEntityController = new AdminEntityController(prisma);
 
   return {
     authRepository,
@@ -158,6 +161,7 @@ export const createContainer = (): AppContainer => {
     paymentService,
     paymentController,
     
-    adminDashboardController
+    adminDashboardController,
+    adminEntityController
   };
 };

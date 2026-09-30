@@ -27,34 +27,23 @@ export class PaymentService implements IPaymentService {
       throw new AppError(`Trip must be in ACCEPTED state to pay (current: ${trip.status})`, HttpStatusCodes.BAD_REQUEST);
     }
 
-    const existingPayment = await this._paymentRepository.getPaymentByTripId(tripId);
-    if (existingPayment && existingPayment.status === 'PENDING') {
-       // Ideally we'd return the client_secret from Stripe, but since we don't store it
-       // and this is mostly an MVP test setup, we will just return the dummy secret.
-       return { clientSecret: 'pi_dummy_secret_test_123', payment: existingPayment };
-    }
-
+    // Instead of returning a dummy secret on retry, we just generate a new PaymentIntent 
+    // from Stripe so the client gets a fresh, real client_secret every time they hit "Pay Now".
+    
     const { clientSecret, paymentId } = await this._paymentProvider.initiatePayment(
       trip.id,
       Number(trip.totalPrice),
       'SAR'
     );
 
-    let payment;
-    if (existingPayment) {
-      // If it exists but we need to update gatewayPaymentId, we don't have a direct repo method.
-      // But we handled the PENDING state above, so we rarely hit this unless it failed and we are retrying.
-      // For MVP, we'll just return the existing one with the new client secret if it somehow reaches here.
-      payment = existingPayment;
-    } else {
-      payment = await this._paymentRepository.createPayment({
-        tripId: trip.id,
-        amount: Number(trip.totalPrice),
-        currency: 'SAR',
-        gateway: 'STRIPE',
-        gatewayPaymentId: paymentId
-      });
-    }
+    // createPayment in repository uses upsert, so it safely updates existing pending payments
+    const payment = await this._paymentRepository.createPayment({
+      tripId: trip.id,
+      amount: Number(trip.totalPrice),
+      currency: 'SAR',
+      gateway: 'STRIPE',
+      gatewayPaymentId: paymentId
+    });
 
     // Mark trip as PAYMENT_PENDING
     if (trip.status !== 'PAYMENT_PENDING') {

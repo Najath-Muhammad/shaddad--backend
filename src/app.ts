@@ -21,9 +21,18 @@ import { isRedisReady } from './config/redis.js';
 
 import { createCustomerTripRouter } from './modules/trip/customer-trip.routes.js';
 import { createDriverTripRouter } from './modules/trip/driver-trip.routes.js';
+import rateLimit from 'express-rate-limit';
 
 export const createApp = (container: AppContainer = createContainer()): Express => {
   const app: Express = express();
+
+  // Rate Limiting
+  const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 1000, // Limit each IP to 1000 requests per windowMs
+    message: { error: 'Too many requests, please try again later.' }
+  });
+  app.use(apiLimiter);
 
   // Security Middleware
   app.use(helmet({
@@ -122,6 +131,10 @@ export const createApp = (container: AppContainer = createContainer()): Express 
   // Payment Routes
   const { createPaymentRouter } = require('./modules/payment/payment.routes.js');
   apiRouter.use('/payments', createPaymentRouter(container.paymentController, container.tokenService));
+
+  // Admin Dashboard Routes
+  const { createAdminDashboardRouter } = require('./modules/admin/admin.routes.js');
+  apiRouter.use('/admin/dashboard', createAdminDashboardRouter(container.adminDashboardController, container.tokenService));
 
   app.use(ApiRoutes.BASE_V1, apiRouter);
 

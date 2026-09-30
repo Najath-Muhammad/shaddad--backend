@@ -11,16 +11,11 @@ export class ReviewController {
       const { rating, comment } = req.body;
       const tripId = req.params.tripId as string;
       const userId = req.user!.userId;
-
-      const profile = await this._prisma.customerProfile.findUnique({ where: { userId } });
-      if (!profile) {
-        res.status(HttpStatusCodes.NOT_FOUND).json(ApiResponseBuilder.error('NOT_FOUND', 'Customer profile not found'));
-        return;
-      }
+      const userRole = req.user!.role; // 'CUSTOMER' or 'DRIVER'
 
       const trip = await this._prisma.trip.findUnique({ where: { id: tripId } });
-      if (!trip || trip.customerId !== profile.id) {
-        res.status(HttpStatusCodes.FORBIDDEN).json(ApiResponseBuilder.error('FORBIDDEN', 'Trip not found or unauthorized'));
+      if (!trip) {
+        res.status(HttpStatusCodes.NOT_FOUND).json(ApiResponseBuilder.error('NOT_FOUND', 'Trip not found'));
         return;
       }
 
@@ -29,8 +24,26 @@ export class ReviewController {
         return;
       }
 
+      let reviewerRole = 'CUSTOMER';
+      if (userRole === 'DRIVER') {
+        const profile = await this._prisma.driverProfile.findUnique({ where: { userId } });
+        if (!profile || trip.driverId !== profile.id) {
+          res.status(HttpStatusCodes.FORBIDDEN).json(ApiResponseBuilder.error('FORBIDDEN', 'Unauthorized'));
+          return;
+        }
+        reviewerRole = 'DRIVER';
+      } else {
+        const profile = await this._prisma.customerProfile.findUnique({ where: { userId } });
+        if (!profile || trip.customerId !== profile.id) {
+          res.status(HttpStatusCodes.FORBIDDEN).json(ApiResponseBuilder.error('FORBIDDEN', 'Unauthorized'));
+          return;
+        }
+      }
+
       // Check if review already exists
-      const existing = await this._prisma.review.findUnique({ where: { tripId } });
+      const existing = await this._prisma.review.findUnique({ 
+        where: { tripId_reviewerRole: { tripId, reviewerRole } } 
+      });
       if (existing) {
         res.status(HttpStatusCodes.BAD_REQUEST).json(ApiResponseBuilder.error('BAD_REQUEST', 'Review already exists'));
         return;
@@ -40,21 +53,32 @@ export class ReviewController {
       const review = await this._prisma.review.create({
         data: {
           tripId,
-          customerId: profile.id,
+          customerId: trip.customerId,
           driverId: trip.driverId,
+          reviewerRole,
           rating,
           comment
         }
       });
 
-      // Update driver average rating
-      const allReviews = await this._prisma.review.findMany({ where: { driverId: trip.driverId } });
-      const avg = allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
-      
-      await this._prisma.driverProfile.update({
-        where: { id: trip.driverId },
-        data: { rating: avg }
-      });
+      // Update average rating
+      if (reviewerRole === 'CUSTOMER') {
+        // Customer reviewing Driver -> update DriverProfile
+        const allReviews = await this._prisma.review.findMany({ where: { driverId: trip.driverId, reviewerRole: 'CUSTOMER' } });
+        const avg = allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
+        await this._prisma.driverProfile.update({
+          where: { id: trip.driverId },
+          data: { rating: avg }
+        });
+      } else {
+        // Driver reviewing Customer -> update CustomerProfile
+        const allReviews = await this._prisma.review.findMany({ where: { customerId: trip.customerId, reviewerRole: 'DRIVER' } });
+        const avg = allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
+        await this._prisma.customerProfile.update({
+          where: { id: trip.customerId },
+          data: { rating: avg }
+        });
+      }
 
       res.status(HttpStatusCodes.CREATED).json(ApiResponseBuilder.success(review, 'Review submitted successfully'));
     } catch (error) {

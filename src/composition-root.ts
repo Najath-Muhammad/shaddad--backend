@@ -112,7 +112,7 @@ export const createContainer = (): AppContainer => {
 
   // Controllers
   const authController = new AuthController(authService);
-  const driverController = new DriverController(driverService);
+  const driverController = new DriverController(driverService, prisma);
   const adminDriverController = new AdminDriverController(driverService);
   const customerDriverController = new CustomerDriverController(driverService);
   const customerTripController = new CustomerTripController(tripService, prisma);

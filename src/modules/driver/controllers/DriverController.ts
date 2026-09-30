@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { PrismaClient } from '@prisma/client';
 import { IDriverService } from '../interfaces/IDriverService.js';
 import { ApiResponseBuilder } from '../../../common/utils/ApiResponse.js';
 import { HttpStatusCodes } from '../../../common/constants/HttpStatusCodes.js';
@@ -6,7 +7,49 @@ import { ResponseMessages } from '../../../common/constants/ResponseMessages.js'
 import { AppError } from '../../../common/errors/AppError.js';
 
 export class DriverController {
-  constructor(private readonly _driverService: IDriverService) {}
+  constructor(
+    private readonly _driverService: IDriverService,
+    private readonly _prisma: PrismaClient
+  ) {}
+
+  withdrawFunds = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = req.user!.userId;
+      
+      await this._prisma.$transaction(async (tx) => {
+        const profile = await tx.driverProfile.findUnique({ where: { userId } });
+        if (!profile) throw new AppError('Driver not found', HttpStatusCodes.NOT_FOUND);
+
+        if (Number(profile.walletBalance) <= 0) {
+          throw new AppError('Insufficient balance', HttpStatusCodes.BAD_REQUEST);
+        }
+
+        const amount = Number(profile.walletBalance);
+
+        // Reset balance
+        await tx.driverProfile.update({
+          where: { id: profile.id },
+          data: { walletBalance: 0 }
+        });
+
+        // Record payout
+        await tx.payout.create({
+          data: {
+            driverProfileId: profile.id,
+            amount,
+            iban: 'SA0000000000000000000000', // Mock IBAN
+            status: 'PAID',
+            processedAt: new Date(),
+            adminNotes: 'Manual withdrawal by driver'
+          }
+        });
+      });
+
+      res.status(HttpStatusCodes.OK).json(ApiResponseBuilder.success(null, 'Withdrawal successful'));
+    } catch (error) {
+      next(error);
+    }
+  };
 
   getProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {

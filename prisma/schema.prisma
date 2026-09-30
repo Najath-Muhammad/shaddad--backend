@@ -241,7 +241,7 @@ model Trip {
 
   statusHistory TripStatusHistory[]
   payment       Payment?
-  review        Review?
+  reviews       Review[]
   Dispute       Dispute[]
 
   @@index([customerId])
@@ -318,15 +318,17 @@ model Payout {
 }
 
 model Review {
-  id         String   @id @default(uuid())
-  tripId     String   @unique
-  trip       Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  customerId String
-  driverId   String
-  rating     Int
-  comment    String?
-  createdAt  DateTime @default(now())
+  id           String   @id @default(uuid())
+  tripId       String
+  trip         Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  customerId   String
+  driverId     String
+  reviewerRole String   @default("CUSTOMER") // "CUSTOMER" or "DRIVER"
+  rating       Int
+  comment      String?
+  createdAt    DateTime @default(now())
 
+  @@unique([tripId, reviewerRole])
   @@map("reviews")
 }
 

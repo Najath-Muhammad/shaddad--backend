@@ -54,5 +54,7 @@ export const createDriverRouter = (
     controller.updateLocation
   );
 
+  router.post('/withdraw', controller.withdrawFunds);
+
   return router;
 };

@@ -28,13 +28,17 @@ export class PaymentController {
 
   simulateSuccess = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const tripId = req.params.tripId;
+      const tripId = req.params.tripId as string;
+      
+      const payment = await this._prisma.payment.findUnique({ where: { tripId } });
+      const gatewayPaymentId = payment?.gatewayPaymentId || 'pi_dummy_123';
+      
       // In a real app we'd trigger webhook. Here we'll just mock the event.
       const event = {
         type: 'payment_intent.succeeded',
         data: {
           object: {
-            id: 'pi_dummy_123',
+            id: gatewayPaymentId,
             amount: 1000,
             currency: 'sar',
             status: 'succeeded',

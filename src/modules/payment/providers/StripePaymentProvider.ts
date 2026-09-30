@@ -49,7 +49,8 @@ export class StripePaymentProvider implements IPaymentProvider {
 
   verifyWebhook(rawBody: string | Buffer, signature: string): WebhookVerificationResult {
     try {
-      if (signature === 'mock_signature' && this._webhookSecret === 'whsec_dummy') {
+      // Allow simulation in non-production environments regardless of webhook secret
+      if (signature === 'mock_signature' && process.env.NODE_ENV !== 'production') {
         return { isValid: true, event: JSON.parse(rawBody.toString()) };
       }
       const event = this._stripe.webhooks.constructEvent(

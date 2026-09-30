@@ -24,5 +24,9 @@ export const createDriverTripRouter = (
   router.patch('/:tripId/status', validateRequest(UpdateTripStatusSchema), controller.updateStatus);
   router.post('/:tripId/deliver', validateRequest(SubmitDeliveryProofSchema), controller.submitDeliveryProof);
 
+  const { ReviewController } = require('../review/controllers/ReviewController.js');
+  const reviewController = new ReviewController((controller as any)._prisma);
+  router.post('/:tripId/review', reviewController.submitReview);
+
   return router;
 };

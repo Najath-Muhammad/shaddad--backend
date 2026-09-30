@@ -121,7 +121,8 @@ export class TripRepository implements ITripRepository {
     return this._prisma.trip.findMany({
       where: { customerId },
       include: {
-        driver: { include: { user: true, vehicle: true } }
+        driver: { include: { user: true, vehicle: true } },
+        reviews: true
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -131,7 +132,8 @@ export class TripRepository implements ITripRepository {
     return this._prisma.trip.findMany({
       where: { driverId: driverProfileId },
       include: {
-        customer: { include: { user: true } }
+        customer: { include: { user: true } },
+        reviews: true
       },
       orderBy: { createdAt: 'desc' }
     });

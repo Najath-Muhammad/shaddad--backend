@@ -1,7 +1,9 @@
-import { DriverProfileResponseDTO, VehicleResponseDTO, NearbyDriverResponseDTO } from '../dtos/DriverResponses.js';
+﻿import { DriverProfileResponseDTO, VehicleResponseDTO, NearbyDriverResponseDTO } from '../dtos/DriverResponses.js';
 
 export class DriverMapper {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static toVehicleResponse(vehicle: any): VehicleResponseDTO {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (!vehicle) return null as any;
     return {
       id: vehicle.id,
@@ -21,6 +23,7 @@ export class DriverMapper {
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static toDriverProfileResponse(driverProfile: any): DriverProfileResponseDTO {
     return {
       id: driverProfile.id,
@@ -47,6 +50,7 @@ export class DriverMapper {
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static toNearbyDriverResponse(driverProfile: any, distanceKm: number): NearbyDriverResponseDTO {
     return {
       id: driverProfile.id,

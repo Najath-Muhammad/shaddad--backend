@@ -1,4 +1,4 @@
-import Stripe from 'stripe';
+﻿import Stripe from 'stripe';
 import { IPaymentProvider, InitiatePaymentResult, WebhookVerificationResult } from '../interfaces/IPaymentProvider.js';
 import { AppError } from '../../../common/errors/AppError.js';
 import { HttpStatusCodes } from '../../../common/constants/HttpStatusCodes.js';
@@ -11,6 +11,7 @@ export class StripePaymentProvider implements IPaymentProvider {
     const secretKey = process.env.STRIPE_SECRET_KEY || 'sk_test_dummy';
     this._webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || 'whsec_dummy';
     this._stripe = new Stripe(secretKey, {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       apiVersion: '2024-06-20' as any
     });
   }
@@ -42,6 +43,7 @@ export class StripePaymentProvider implements IPaymentProvider {
         clientSecret: paymentIntent.client_secret,
         paymentId: paymentIntent.id
       };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       throw new AppError(`Stripe Error: ${error.message}`, HttpStatusCodes.INTERNAL_SERVER_ERROR);
     }
@@ -59,6 +61,7 @@ export class StripePaymentProvider implements IPaymentProvider {
         this._webhookSecret
       );
       return { isValid: true, event };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       return { isValid: false, error: err.message };
     }

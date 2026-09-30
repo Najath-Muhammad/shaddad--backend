@@ -1,4 +1,4 @@
-import request from 'supertest';
+﻿import request from 'supertest';
 import { createApp } from '../../src/app';
 import { PrismaClient, UserRole } from '@prisma/client';
 import { createContainer } from '../../src/composition-root';
@@ -11,6 +11,7 @@ const app = createApp(container);
 describe('Complete SHADDAD End-to-End Lifecycle', () => {
   let customerToken: string;
   let driverToken: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let adminToken: string;
   let tripId: string;
   let deliveryOtp: string;

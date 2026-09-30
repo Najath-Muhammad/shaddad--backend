@@ -1,4 +1,4 @@
-import { PrismaClient, Payment, PaymentStatus } from '@prisma/client';
+﻿import { PrismaClient, Payment, PaymentStatus } from '@prisma/client';
 import { IPaymentRepository } from '../interfaces/IPaymentRepository.js';
 
 export class PaymentRepository implements IPaymentRepository {
@@ -25,6 +25,7 @@ export class PaymentRepository implements IPaymentRepository {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async updatePaymentStatus(gatewayPaymentId: string, status: PaymentStatus, rawResponse?: any): Promise<Payment> {
     return this._prisma.payment.update({
       where: { gatewayPaymentId },

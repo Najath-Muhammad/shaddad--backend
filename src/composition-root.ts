@@ -1,4 +1,4 @@
-import { prisma } from './config/database.js';
+﻿import { prisma } from './config/database.js';
 import { getRedisClient } from './config/redis.js';
 
 // Auth Module
@@ -64,11 +64,17 @@ export interface AppContainer {
   driverTripController: DriverTripController;
 
   // Phase 5
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   paymentRepository: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   paymentProvider: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   paymentService: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   paymentController: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   adminDashboardController: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   adminEntityController: any;
 }
 

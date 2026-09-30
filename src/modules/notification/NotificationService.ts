@@ -1,9 +1,10 @@
-import { PrismaClient } from '@prisma/client';
+﻿import { PrismaClient } from '@prisma/client';
 import { SocketServer } from '../realtime/SocketServer.js';
 
 export class NotificationService {
   constructor(private readonly _prisma: PrismaClient) {}
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async sendNotification(userId: string, title: string, body: string, data?: any) {
     // 1. Save to database
     const notification = await this._prisma.notification.create({

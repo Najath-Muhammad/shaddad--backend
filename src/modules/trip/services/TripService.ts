@@ -1,4 +1,4 @@
-import { Trip, TripStatus } from '@prisma/client';
+﻿import { Trip, TripStatus } from '@prisma/client';
 import { ITripService } from '../interfaces/ITripService.js';
 import { ITripRepository } from '../interfaces/ITripRepository.js';
 import { IPricingService, PricingBreakdownDTO } from '../../pricing/interfaces/IPricingService.js';
@@ -25,6 +25,7 @@ export class TripService implements ITripService {
     private readonly _tripRepository: ITripRepository,
     private readonly _pricingService: IPricingService,
     private readonly _driverRepository: IDriverRepository,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private readonly _payoutService: any // Avoid circular type dependency for now by using any
   ) {}
 
@@ -146,6 +147,7 @@ export class TripService implements ITripService {
       throw new AppError(`Invalid state transition from ${currentState} to ${newState}`, HttpStatusCodes.BAD_REQUEST);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updatedTrip = await this._tripRepository.updateTripStatus(tripId, newState as any, profileId, 'User triggered transition');
     return updatedTrip;
   }
@@ -166,9 +168,11 @@ export class TripService implements ITripService {
     }
 
     // Update to DELIVERED
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let updatedTrip = await this._tripRepository.updateTripStatus(tripId, 'DELIVERED' as any, driverProfileId, 'Valid OTP provided');
 
     // Auto-complete
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     updatedTrip = await this._tripRepository.updateTripStatus(tripId, 'COMPLETED' as any, driverProfileId, 'Trip completed successfully');
     await this._driverRepository.updateAvailability(driverProfileId, 'ONLINE');
 

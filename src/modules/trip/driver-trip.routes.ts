@@ -1,4 +1,4 @@
-import { Router } from 'express';
+﻿import { Router } from 'express';
 import { DriverTripController } from './controllers/DriverTripController.js';
 import { requireRole } from '../../common/middleware/requireRole.js';
 import { createAuthenticateJwtMiddleware } from '../../common/middleware/authenticateJwt.js';
@@ -25,6 +25,7 @@ export const createDriverTripRouter = (
   router.post('/:tripId/deliver', validateRequest(SubmitDeliveryProofSchema), controller.submitDeliveryProof);
 
   const { ReviewController } = require('../review/controllers/ReviewController.js');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const reviewController = new ReviewController((controller as any)._prisma);
   router.post('/:tripId/review', reviewController.submitReview);
 

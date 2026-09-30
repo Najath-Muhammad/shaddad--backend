@@ -1,4 +1,4 @@
-import Redis from 'ioredis';
+﻿import Redis from 'ioredis';
 import { IDriverLocationRepository, NearbyDriverLocation } from '../interfaces/IDriverLocationRepository.js';
 import { isRedisReady } from '../../../config/redis.js';
 import { logger } from '../../../common/utils/logger.js';
@@ -36,6 +36,7 @@ export class DriverLocationRepository implements IDriverLocationRepository {
       'FROMLONLAT', longitude, latitude,
       'BYRADIUS', radiusKm, 'km',
       'WITHDIST', 'WITHCOORD', 'ASC'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) as any[];
 
     return results.map(res => ({

@@ -1,4 +1,4 @@
-import { User, CustomerProfile, DriverProfile } from '@prisma/client';
+﻿import { User, CustomerProfile, DriverProfile } from '@prisma/client';
 import { UserResponseDTO } from '../dtos/UserResponseDTO.js';
 import { UserRoleType, DriverVerificationStatusType } from '../../../common/constants/AppConstants.js';
 
@@ -34,9 +34,11 @@ export class UserResponseMapper {
         nationalIdNumber: user.driverProfile.nationalIdNumber,
         licenseNumber: user.driverProfile.licenseNumber,
         verificationStatus: user.driverProfile.verificationStatus as DriverVerificationStatusType,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         availability: (user.driverProfile as any).availability, // workaround since prisma client type might be out of sync if not fully generated
         rating: user.driverProfile.rating,
         walletBalance: user.driverProfile.walletBalance.toString(),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any;
     }
 

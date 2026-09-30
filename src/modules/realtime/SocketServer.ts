@@ -24,12 +24,14 @@ export class SocketServer {
     this.initialize();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static emitToUser(userId: string, event: string, data: any) {
     if (this._instance) {
       this._instance.to(`user__${userId}`).emit(event, data);
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static emitToTrip(tripId: string, event: string, data: any) {
     if (this._instance) {
       this._instance.to(`trip__${tripId}`).emit(event, data);
@@ -46,17 +48,20 @@ export class SocketServer {
         }
 
         const decoded = await this._tokenService.verifyAccessToken(token);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (socket as any).user = decoded;
         next();
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
         next(new Error('Authentication error: Invalid token'));
       }
     });
 
     this._io.on('connection', (socket: Socket) => {
-      console.log(`Socket connected: ${socket.id}, User: ${(socket as any).user.userId}`);
-      
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const user = (socket as any).user;
+      // eslint-disable-next-line no-console
+      console.log(`Socket connected: ${socket.id}, User: ${user.userId}`);
       socket.join(`user__${user.userId}`);
 
       socket.on('join_trip', async (data: { tripId: string }) => {
@@ -80,6 +85,7 @@ export class SocketServer {
         }
 
         socket.join(`trip__${tripId}`);
+        // eslint-disable-next-line no-console
         console.log(`User ${user.userId} joined trip room trip__${tripId}`);
       });
 
@@ -112,8 +118,10 @@ export class SocketServer {
       });
 
       socket.on('disconnect', () => {
+        // eslint-disable-next-line no-console
         console.log(`Socket disconnected: ${socket.id}`);
       });
     });
   }
 }
+

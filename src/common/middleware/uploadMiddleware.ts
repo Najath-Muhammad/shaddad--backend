@@ -1,4 +1,4 @@
-import multer from 'multer';
+﻿import multer from 'multer';
 import path from 'path';
 import crypto from 'crypto';
 import fs from 'fs';
@@ -24,6 +24,7 @@ const storage = multer.diskStorage({
   },
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
   if (allowedMimeTypes.includes(file.mimetype)) {

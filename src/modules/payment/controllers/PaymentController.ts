@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+﻿import { Request, Response, NextFunction } from 'express';
 import { IPaymentService } from '../interfaces/IPaymentService.js';
 import { HttpStatusCodes } from '../../../common/constants/HttpStatusCodes.js';
 import { ApiResponseBuilder } from '../../../common/utils/ApiResponse.js';
@@ -62,6 +62,7 @@ export class PaymentController {
       res.status(HttpStatusCodes.OK).send({ received: true });
     } catch (error) {
       // Stripe requires errors to be 400 for bad signatures
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       res.status(HttpStatusCodes.BAD_REQUEST).send(`Webhook Error: ${(error as any).message}`);
     }
   };

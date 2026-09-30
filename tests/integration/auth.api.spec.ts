@@ -1,4 +1,4 @@
-import request from 'supertest';
+﻿import request from 'supertest';
 import { createApp } from '../../src/app.js';
 import { AppContainer } from '../../src/composition-root.js';
 import { IAuthRepository, CreateUserData } from '../../src/modules/auth/interfaces/IAuthRepository.js';
@@ -135,22 +135,37 @@ describe('Auth API (Integration Tests)', () => {
       authService,
       authController,
       driverController: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         getProfile: (req: any, res: any) => res.json({}),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         getVehicle: (req: any, res: any) => res.json({}),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         createVehicle: (req: any, res: any) => res.json({}),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         updateVehicle: (req: any, res: any) => res.json({}),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         uploadDocuments: (req: any, res: any) => res.json({}),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         updateAvailability: (req: any, res: any) => res.json({}),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         updateLocation: (req: any, res: any) => res.json({}),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
       adminDriverController: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         getPendingDrivers: (req: any, res: any) => res.json({}),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         getDriverDossier: (req: any, res: any) => res.json({}),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         verifyDriver: (req: any, res: any) => res.json({}),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
       customerDriverController: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         getNearbyDrivers: (req: any, res: any) => res.json({}),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         getDriverDetails: (req: any, res: any) => res.json({}),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
     } as AppContainer;
 

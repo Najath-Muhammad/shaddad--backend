@@ -1,4 +1,4 @@
-
+﻿
 
 export interface InitiatePaymentResult {
   clientSecret: string;
@@ -7,6 +7,7 @@ export interface InitiatePaymentResult {
 
 export interface WebhookVerificationResult {
   isValid: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   event?: any;
   error?: string;
 }

@@ -116,7 +116,10 @@ export class AuthService implements IAuthService {
     }
 
     if (!user.isActive) {
-      throw new ForbiddenError(ResponseMessages.ACCOUNT_INACTIVE, 'ACCOUNT_INACTIVE');
+      const blockMsg = user.blockReason
+        ? `Your account has been suspended. Reason: ${user.blockReason}`
+        : ResponseMessages.ACCOUNT_INACTIVE;
+      throw new ForbiddenError(blockMsg, 'ACCOUNT_INACTIVE');
     }
 
     const isPasswordValid = await this._hashService.comparePassword(

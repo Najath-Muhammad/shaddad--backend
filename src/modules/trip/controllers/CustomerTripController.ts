@@ -87,6 +87,12 @@ export class CustomerTripController {
         reason: reason || 'Customer canceled the request'
       });
 
+      // Also send a general notification so the driver's app pops up an Alert
+      SocketServer.emitToUser(trip.driver.userId, 'notification', {
+        title: 'Request Canceled',
+        body: `The customer canceled the trip request.\nReason: ${reason || 'No reason provided'}`
+      });
+
       res.status(HttpStatusCodes.OK).json(ApiResponseBuilder.success(updatedTrip, 'Trip canceled successfully'));
     } catch (error) {
       next(error);

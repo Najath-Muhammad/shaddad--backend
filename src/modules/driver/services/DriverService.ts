@@ -3,6 +3,7 @@ import { IDriverRepository } from '../interfaces/IDriverRepository.js';
 import { IDriverLocationRepository } from '../interfaces/IDriverLocationRepository.js';
 import { CreateVehicleDTO } from '../dtos/CreateVehicleDTO.js';
 import { UpdateVehicleDTO } from '../dtos/UpdateVehicleDTO.js';
+import { getFileUrl } from '../../../common/middleware/uploadMiddleware.js';
 import { UpdateAvailabilityDTO } from '../dtos/UpdateAvailabilityDTO.js';
 import { UpdateLocationDTO } from '../dtos/UpdateLocationDTO.js';
 import { VerifyDriverDTO } from '../dtos/VerifyDriverDTO.js';
@@ -91,7 +92,7 @@ export class DriverService implements IDriverService {
     const vehicleDocs: Record<string, string> = {};
 
     for (const file of files) {
-      const url = `/uploads/${file.filename}`;
+      const url = getFileUrl(file);
       if (file.fieldname === 'profilePhoto') profileDocs.profilePhotoUrl = url;
       if (file.fieldname === 'nationalIdFront') profileDocs.nationalIdFrontUrl = url;
       if (file.fieldname === 'nationalIdBack') profileDocs.nationalIdBackUrl = url;

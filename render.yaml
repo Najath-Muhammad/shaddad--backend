@@ -32,6 +32,12 @@ services:
         value: "https://shaddad-frontend-admin.vercel.app,https://shaddad-admin.vercel.app"
       - key: LOG_LEVEL
         value: info
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
 
 databases:
   - name: shaddad-db
@@ -41,3 +47,4 @@ databases:
   - name: shaddad-redis
     plan: free
     region: singapore
+

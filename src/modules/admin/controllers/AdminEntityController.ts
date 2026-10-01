@@ -1,3 +1,4 @@
+import { SocketServer } from '../../realtime/SocketServer.js';
 import { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { ApiResponseBuilder } from '../../../common/utils/ApiResponse.js';
@@ -51,19 +52,33 @@ export class AdminEntityController {
   toggleUserBlock = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userId = req.params.userId as string;
+      const { reason } = req.body;
+      
       const user = await this._prisma.user.findUnique({ where: { id: userId } });
       if (!user) {
         res.status(HttpStatusCodes.NOT_FOUND).json(ApiResponseBuilder.error('NOT_FOUND', 'User not found'));
         return;
       }
 
+      const willBeActive = !user.isActive;
+
       const updated = await this._prisma.user.update({
         where: { id: userId },
-        data: { isActive: !user.isActive }
+        data: { 
+          isActive: willBeActive,
+          blockReason: willBeActive ? null : (reason || 'No reason provided')
+        }
       });
 
+      if (!willBeActive) {
+        // Emit event to the blocked user to force logout on mobile
+        SocketServer.emitToUser(userId, 'user_blocked', {
+          reason: updated.blockReason
+        });
+      }
+
       res.status(HttpStatusCodes.OK).json(ApiResponseBuilder.success(
-        { isActive: updated.isActive }, 
+        { isActive: updated.isActive, blockReason: updated.blockReason }, 
         `User ${updated.isActive ? 'unblocked' : 'blocked'} successfully`
       ));
     } catch (error) {

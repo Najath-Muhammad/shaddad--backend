@@ -44,6 +44,7 @@ model User {
   fullName     String
   role         UserRole @default(CUSTOMER)
   isActive     Boolean  @default(true)
+  blockReason  String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -394,4 +395,5 @@ model SupportTicket {
   @@index([status])
   @@map("support_tickets")
 }
+
 

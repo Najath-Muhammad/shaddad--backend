@@ -54,4 +54,42 @@ export class CustomerTripController {
       next(error);
     }
   };
+
+  cancelTrip = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const customerProfileId = await this._getCustomerProfileId(req.user!.userId);
+      const tripId = req.params.tripId as string;
+      const { reason } = req.body;
+
+      // Ensure the trip exists and belongs to this customer
+      const trip = await this._prisma.trip.findUnique({
+        where: { id: tripId },
+        include: { driver: { include: { user: true } } }
+      });
+
+      if (!trip || trip.customerId !== customerProfileId) {
+        throw new AppError('Trip not found or unauthorized', HttpStatusCodes.NOT_FOUND, 'TRIP_NOT_FOUND');
+      }
+
+      if (trip.status !== 'PENDING_DRIVER_RESPONSE' && trip.status !== 'ACCEPTED') {
+        throw new AppError('Cannot cancel trip at this stage', HttpStatusCodes.BAD_REQUEST, 'INVALID_STATUS');
+      }
+
+      const updatedTrip = await this._prisma.trip.update({
+        where: { id: tripId },
+        data: { status: 'CANCELED' }
+      });
+
+      // Notify the driver
+      const { SocketServer } = await import('../../realtime/SocketServer.js');
+      SocketServer.emitToUser(trip.driver.userId, 'trip_canceled', {
+        tripId,
+        reason: reason || 'Customer canceled the request'
+      });
+
+      res.status(HttpStatusCodes.OK).json(ApiResponseBuilder.success(updatedTrip, 'Trip canceled successfully'));
+    } catch (error) {
+      next(error);
+    }
+  };
 }

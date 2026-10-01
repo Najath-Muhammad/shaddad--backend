@@ -1,4 +1,4 @@
-﻿import { Router } from 'express';
+import { Router } from 'express';
 import { CustomerTripController } from './controllers/CustomerTripController.js';
 import { requireRole } from '../../common/middleware/requireRole.js';
 import { createAuthenticateJwtMiddleware } from '../../common/middleware/authenticateJwt.js';
@@ -20,6 +20,8 @@ export const createCustomerTripRouter = (
   router.post('/', validateRequest(CreateTripSchema), controller.createTrip);
   router.get('/', controller.getTrips);
   router.get('/:tripId', controller.getTrip);
+  
+  router.post('/:tripId/cancel', controller.cancelTrip);
   
   const { ReviewController } = require('../review/controllers/ReviewController.js');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

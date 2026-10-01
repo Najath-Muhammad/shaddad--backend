@@ -4,6 +4,7 @@ import { HttpStatusCodes } from '../../../common/constants/HttpStatusCodes.js';
 import { ApiResponseBuilder } from '../../../common/utils/ApiResponse.js';
 import { AppError } from '../../../common/errors/AppError.js';
 import { PrismaClient } from '@prisma/client';
+import { SocketServer } from '../../realtime/SocketServer.js';
 
 export class CustomerTripController {
   constructor(
@@ -77,11 +78,12 @@ export class CustomerTripController {
 
       const updatedTrip = await this._prisma.trip.update({
         where: { id: tripId },
-        data: { status: 'CANCELED' }
+        data: { status: 'CANCELED', cancelReason: reason || 'Customer canceled the request' }
       });
 
       // Notify the driver
-      const { SocketServer } = await import('../../realtime/SocketServer.js');
+      
+      console.log("EMITTING SOCKET EVENT trip_canceled to", trip.driver.userId);
       SocketServer.emitToUser(trip.driver.userId, 'trip_canceled', {
         tripId,
         reason: reason || 'Customer canceled the request'

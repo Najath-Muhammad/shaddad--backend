@@ -235,6 +235,7 @@ model Trip {
   totalPrice     Decimal @db.Decimal(10, 2)
 
   status    TripStatus @default(PENDING_DRIVER_RESPONSE)
+  cancelReason String?
   expiresAt DateTime
 
   createdAt DateTime @default(now())

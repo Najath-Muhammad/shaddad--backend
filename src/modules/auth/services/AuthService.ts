@@ -131,7 +131,20 @@ export class AuthService implements IAuthService {
     }
 
     if (dto.expectedRole && user.role !== dto.expectedRole) {
-      throw new ForbiddenError(ResponseMessages.FORBIDDEN, 'ROLE_MISMATCH');
+      if (dto.expectedRole === 'CUSTOMER' && user.role === 'DRIVER') {
+        // Allow Driver to login as Customer
+      } else if (dto.expectedRole === 'DRIVER' && user.role === 'CUSTOMER') {
+        // Upgrade Customer to Driver
+        await this._authRepository.updateUserRole(user.id, 'DRIVER');
+        // create empty driver profile if it doesn't exist
+        const hasDriverProfile = await this._authRepository.findDriverProfile(user.id);
+        if (!hasDriverProfile) {
+          await this._authRepository.createDriverProfile(user.id);
+        }
+        user.role = 'DRIVER';
+      } else {
+        throw new ForbiddenError(ResponseMessages.FORBIDDEN, 'ROLE_MISMATCH');
+      }
     }
 
     const tokens = await this._issueAndStoreTokens({
@@ -219,5 +232,6 @@ export class AuthService implements IAuthService {
     return tokens;
   }
 }
+
 
 

@@ -21,4 +21,9 @@ export interface IAuthRepository {
   findRefreshToken(tokenHash: string): Promise<RefreshToken | null>;
   revokeRefreshToken(tokenHash: string): Promise<void>;
   revokeAllUserTokens(userId: string): Promise<void>;
+  updateUserRole(userId: string, role: string): Promise<any>;
+  findDriverProfile(userId: string): Promise<any>;
+  createDriverProfile(userId: string): Promise<any>;
 }
+
+

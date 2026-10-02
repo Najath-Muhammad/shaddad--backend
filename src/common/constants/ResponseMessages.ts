@@ -17,8 +17,7 @@ export const ResponseMessages = {
   FORBIDDEN: 'Access denied. You do not have permission for this resource',
   TOKEN_EXPIRED: 'Token has expired. Please refresh your session',
   INVALID_REFRESH_TOKEN: 'Invalid or revoked refresh token',
-  USER_NOT_FOUND: 'User account not found',
-  ACCOUNT_INACTIVE: 'Account is deactivated. Please contact support',
+    ACCOUNT_INACTIVE: 'Account is deactivated. Please contact support',
 
   // Driver Profile
   DRIVER_PROFILE_RETRIEVED: 'Driver profile retrieved successfully',
@@ -70,4 +69,5 @@ export const ResponseMessages = {
   NOT_FOUND: 'The requested resource was not found',
   ROUTE_NOT_FOUND: 'The requested endpoint does not exist',
 } as const;
+
 

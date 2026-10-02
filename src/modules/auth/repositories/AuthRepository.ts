@@ -54,6 +54,16 @@ export class AuthRepository implements IAuthRepository {
     });
   }
 
+  public async updateUserRole(userId: string, role: any): Promise<any> {
+    return this._prisma.user.update({ where: { id: userId }, data: { role } });
+  }
+  public async findDriverProfile(userId: string): Promise<any> {
+    return this._prisma.driverProfile.findUnique({ where: { userId } });
+  }
+  public async createDriverProfile(userId: string): Promise<any> {
+    return this._prisma.driverProfile.create({ data: { userId } });
+  }
+
   public async createUser(data: CreateUserData): Promise<UserWithProfiles> {
     return this._prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
@@ -126,3 +136,5 @@ export class AuthRepository implements IAuthRepository {
     });
   }
 }
+
+

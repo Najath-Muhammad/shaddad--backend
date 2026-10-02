@@ -238,11 +238,7 @@ export class DriverService implements IDriverService {
     );
     
     return dbResults.map(row => {
-      // It's pre-mapped by the repository's raw query wrapper
-      return {
-        ...row,
-        // distanceKm is already there
-      };
+      return DriverMapper.toNearbyDriverResponse(row, row.distanceKm);
     });
   }
 
@@ -261,3 +257,4 @@ export class DriverService implements IDriverService {
     return DriverMapper.toNearbyDriverResponse(profile, 0);
   }
 }
+

@@ -5,7 +5,7 @@ services:
     region: singapore
     branch: dev
     buildCommand: npm install && npm run build
-    startCommand: npx prisma migrate deploy && npm start
+    startCommand: npx prisma migrate deploy && npx prisma db seed && npm start
     envVars:
       - key: NODE_ENV
         value: production
@@ -47,5 +47,6 @@ databases:
   - name: shaddad-redis
     plan: free
     region: singapore
+
 
 

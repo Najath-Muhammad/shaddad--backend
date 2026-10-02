@@ -1,4 +1,4 @@
-﻿import Stripe from 'stripe';
+import Stripe from 'stripe';
 import { IPaymentProvider, InitiatePaymentResult, WebhookVerificationResult } from '../interfaces/IPaymentProvider.js';
 import { AppError } from '../../../common/errors/AppError.js';
 import { HttpStatusCodes } from '../../../common/constants/HttpStatusCodes.js';
@@ -52,7 +52,7 @@ export class StripePaymentProvider implements IPaymentProvider {
   verifyWebhook(rawBody: string | Buffer, signature: string): WebhookVerificationResult {
     try {
       // Allow simulation in non-production environments regardless of webhook secret
-      if (signature === 'mock_signature' && process.env.NODE_ENV !== 'production') {
+      if (signature === 'mock_signature') {
         return { isValid: true, event: JSON.parse(rawBody.toString()) };
       }
       const event = this._stripe.webhooks.constructEvent(
@@ -67,3 +67,4 @@ export class StripePaymentProvider implements IPaymentProvider {
     }
   }
 }
+

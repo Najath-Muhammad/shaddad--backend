@@ -81,6 +81,14 @@ export class CustomerTripController {
         data: { status: 'CANCELED', cancelReason: reason || 'Customer canceled the request' }
       });
 
+      // Release driver availability if the trip was already accepted
+      if (trip.status === 'ACCEPTED') {
+        await this._prisma.driverProfile.update({
+          where: { id: trip.driverId },
+          data: { availability: 'ONLINE' }
+        });
+      }
+
       // Notify the driver
       
       console.log("EMITTING SOCKET EVENT trip_canceled to", trip.driver.userId);

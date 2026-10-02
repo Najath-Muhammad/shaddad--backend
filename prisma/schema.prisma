@@ -235,9 +235,9 @@ model Trip {
   driverEarnings Decimal @db.Decimal(10, 2)
   totalPrice     Decimal @db.Decimal(10, 2)
 
-  status    TripStatus @default(PENDING_DRIVER_RESPONSE)
+  status       TripStatus @default(PENDING_DRIVER_RESPONSE)
   cancelReason String?
-  expiresAt DateTime
+  expiresAt    DateTime
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -395,5 +395,3 @@ model SupportTicket {
   @@index([status])
   @@map("support_tickets")
 }
-
-

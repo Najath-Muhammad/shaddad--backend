@@ -1,8 +1,9 @@
-﻿import { User, CustomerProfile, DriverProfile } from '@prisma/client';
+import { User, CustomerProfile, DriverProfile } from '@prisma/client';
 import { UserResponseDTO } from '../dtos/UserResponseDTO.js';
 import { UserRoleType, DriverVerificationStatusType } from '../../../common/constants/AppConstants.js';
 
 export type UserWithProfiles = User & {
+  vehicle?: any;
   customerProfile?: CustomerProfile | null;
   driverProfile?: DriverProfile | null;
 };
@@ -38,6 +39,7 @@ export class UserResponseMapper {
         availability: (user.driverProfile as any).availability, // workaround since prisma client type might be out of sync if not fully generated
         rating: user.driverProfile.rating,
         walletBalance: user.driverProfile.walletBalance.toString(),
+        vehicle: (user.driverProfile as any).vehicle,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any;
     }
@@ -45,3 +47,4 @@ export class UserResponseMapper {
     return dto;
   }
 }
+

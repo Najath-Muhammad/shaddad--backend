@@ -14,7 +14,7 @@ export class AuthRepository implements IAuthRepository {
       where: { id },
       include: {
         customerProfile: true,
-        driverProfile: true,
+        driverProfile: { include: { vehicle: true } },
       },
     });
   }
@@ -24,7 +24,7 @@ export class AuthRepository implements IAuthRepository {
       where: { phoneNumber },
       include: {
         customerProfile: true,
-        driverProfile: true,
+        driverProfile: { include: { vehicle: true } },
       },
     });
   }
@@ -34,7 +34,7 @@ export class AuthRepository implements IAuthRepository {
       where: { email },
       include: {
         customerProfile: true,
-        driverProfile: true,
+        driverProfile: { include: { vehicle: true } },
       },
     });
   }
@@ -49,7 +49,7 @@ export class AuthRepository implements IAuthRepository {
       },
       include: {
         customerProfile: true,
-        driverProfile: true,
+        driverProfile: { include: { vehicle: true } },
       },
     });
   }
@@ -96,7 +96,7 @@ export class AuthRepository implements IAuthRepository {
         where: { id: user.id },
         include: {
           customerProfile: true,
-          driverProfile: true,
+          driverProfile: { include: { vehicle: true } },
         },
       });
     });
@@ -136,5 +136,6 @@ export class AuthRepository implements IAuthRepository {
     });
   }
 }
+
 
 

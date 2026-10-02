@@ -30,6 +30,13 @@ export const errorHandler = (
     return;
   }
 
+  if (err.name === 'TokenExpiredError' || err.name === 'JsonWebTokenError') {
+    res.status(HttpStatusCodes.UNAUTHORIZED).json(
+      ApiResponseBuilder.error('UNAUTHORIZED', ResponseMessages.UNAUTHORIZED)
+    );
+    return;
+  }
+
   // Unhandled / Internal Server Error
   logger.error(
     {
@@ -50,3 +57,4 @@ export const errorHandler = (
       )
     );
 };
+

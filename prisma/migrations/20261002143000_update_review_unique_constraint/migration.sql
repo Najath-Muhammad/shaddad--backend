@@ -1,3 +1,6 @@
+-- AlterTable
+ALTER TABLE "reviews" ADD COLUMN "reviewerRole" TEXT NOT NULL DEFAULT 'CUSTOMER';
+
 -- DropIndex
 DROP INDEX "reviews_tripId_key";
 

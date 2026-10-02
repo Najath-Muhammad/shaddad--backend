@@ -112,7 +112,7 @@ export class AuthService implements IAuthService {
   public async login(dto: LoginDTO): Promise<AuthResult> {
     const user = await this._authRepository.findUserByIdentifier(dto.identifier);
     if (!user) {
-      throw new UnauthorizedError(ResponseMessages.INVALID_CREDENTIALS, 'INVALID_CREDENTIALS');
+      throw new UnauthorizedError(ResponseMessages.USER_NOT_FOUND, 'USER_NOT_FOUND');
     }
 
     if (!user.isActive) {
@@ -127,7 +127,7 @@ export class AuthService implements IAuthService {
       user.passwordHash
     );
     if (!isPasswordValid) {
-      throw new UnauthorizedError(ResponseMessages.INVALID_CREDENTIALS, 'INVALID_CREDENTIALS');
+      throw new UnauthorizedError(ResponseMessages.INCORRECT_PASSWORD, 'INCORRECT_PASSWORD');
     }
 
     if (dto.expectedRole && user.role !== dto.expectedRole) {
@@ -219,3 +219,5 @@ export class AuthService implements IAuthService {
     return tokens;
   }
 }
+
+

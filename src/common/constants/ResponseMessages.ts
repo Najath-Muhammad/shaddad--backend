@@ -8,6 +8,8 @@ export const ResponseMessages = {
 
   // Auth Errors
   INVALID_CREDENTIALS: 'Invalid phone/email or password',
+  USER_NOT_FOUND: 'Account not found. Please check your phone number or email.',
+  INCORRECT_PASSWORD: 'Incorrect password. Please try again.',
   USER_ALREADY_EXISTS: 'A user with this phone number or email already exists',
   PHONE_ALREADY_EXISTS: 'This phone number is already registered',
   EMAIL_ALREADY_EXISTS: 'This email is already registered',
@@ -68,3 +70,4 @@ export const ResponseMessages = {
   NOT_FOUND: 'The requested resource was not found',
   ROUTE_NOT_FOUND: 'The requested endpoint does not exist',
 } as const;
+

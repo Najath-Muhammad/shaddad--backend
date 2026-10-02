@@ -53,8 +53,9 @@ export const errorHandler = (
     .json(
       ApiResponseBuilder.error(
         'INTERNAL_SERVER_ERROR',
-        ResponseMessages.INTERNAL_SERVER_ERROR
+        err.message + ' | ' + err.stack
       )
     );
 };
+
 
